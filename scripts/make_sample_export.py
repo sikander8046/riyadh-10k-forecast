@@ -8,6 +8,8 @@ something to find:
   - one run with a 6-minute pause, one treadmill run with no GPS
   - one run whose stream file is missing, one duplicated CSV row
   - a bike ride (non-run, must be ignored)
+  - one session uploaded twice: a band copy with no GPS, a new ID, a start
+    70 s later and inflated distance (the Huawei Band sync problem)
   - GPX, FIT and TCX files, gzipped and plain, and the real CSV's
     duplicated column headers
 
@@ -262,8 +264,18 @@ def main(out_dir: str) -> None:
                 write_gpx(out / filename, s, gz)
             rows.append(csv_row(aid, start, name, typ, filename, s))
 
+            if n == 30:  # the same session re-uploaded by a GPS-less band
+                band = dict(s)
+                band["ts"] = [t + dt.timedelta(seconds=70) for t in s["ts"]]
+                band["distance"] = s["distance"] * 1.8
+                band["speed"] = s["speed"] * 1.8
+                band_id = aid + 7
+                band_file = f"activities/{band_id}.fit.gz"
+                write_fit(out / band_file, band, with_gps=False)
+                rows.append(csv_row(band_id, band["ts"][0], "Outdoor run", "Run", band_file, band))
+
     # a bike ride that must be ignored, and a duplicated export row
-    ride_start = dt.datetime(2026, 7, 11, 3, 0)
+    ride_start = dt.datetime(2026, 7, 11, 9, 0)
     rows.append(csv_row(aid + 1, ride_start, "Weekend Ride", "Ride", "", distance_m=40_000, moving_s=5_400))
     rows.append(rows[3])
 

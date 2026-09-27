@@ -1,12 +1,16 @@
 -- Grain: one row per activity per recorded timestamp (typically 1 s).
 -- Adds the time interval each sample represents, validity flags, and a
 -- moving flag used to weight every stream metric by time rather than by row.
+-- Streams of device duplicates are excluded (see stg_activities).
 CREATE OR REPLACE TABLE staging.stg_records AS
 WITH base AS (
     SELECT
         r.*,
         date_diff('millisecond', lag(r.ts) OVER w, r.ts) / 1000.0 AS gap_s
     FROM raw.records AS r
+    WHERE r.activity_id IN (
+        SELECT activity_id FROM staging.stg_activities WHERE NOT is_device_duplicate
+    )
     WINDOW w AS (PARTITION BY r.activity_id ORDER BY r.ts)
 )
 SELECT

@@ -72,6 +72,9 @@ def run_ingest(cfg: Config, force: bool = False) -> IngestSummary:
             else:
                 try:
                     records = parse_stream(source)
+                    # recorded before privacy trimming, which may blank every coordinate;
+                    # staging uses it to tell a GPS recording from a band's step estimate
+                    records["had_gps"] = bool(records["lat"].notna().any())
                     records = trim_endpoints(records, cfg.trim_start_end_m, cfg.keep_coordinates)
                     records.insert(0, "activity_id", act.activity_id)
                     records.to_parquet(target, index=False)

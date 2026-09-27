@@ -17,7 +17,7 @@ Strava export ──► data/interim (Parquet, privacy-trimmed) ──► raw �
 | Table | Grain | Key logic |
 |---|---|---|
 | `staging.params` | single row | Athlete and quality settings from config.yaml, joined into models instead of hard-coding |
-| `staging.stg_activities` | activity (PK `activity_id`) | Dedup, local date via timezone periods, treadmill flag |
+| `staging.stg_activities` | activity (PK `activity_id`) | Exact dedup, device-duplicate detection (`is_device_duplicate`, `duplicate_of`, `has_gps`), local date via timezone periods, treadmill flag |
 | `staging.stg_records` | activity × timestamp | `gap_s` (time each sample represents), invalid HR nulled (raw kept in `hr_raw`), cadence normalised to steps/min, `is_gap`, `is_speed_spike`, `is_moving` |
 
 ## marts
@@ -53,7 +53,21 @@ intervals, so filter by session type before interpreting it.
 
 **ACWR.** 7-day mean load / 28-day mean load (rolling-average form; undefined for the first 27 days).
 
+## Device duplicates
+
+A phone app and a wrist band can both upload the same session, producing two
+activities with different IDs. Activities whose starts fall within
+`duplicate_window_s` (default 180 s) of the previous one are grouped into a
+session. The copy with GPS is kept (GPS distance is measured; a band without GPS
+estimates distance from steps), then the one with a stream file, then the lowest
+ID. Flagged copies stay in `stg_activities` for the audit and are excluded from
+`stg_records` and every mart.
+
 ## Known limitations
+
+- Two genuinely separate activities started within the duplicate window (e.g. a
+  warm-up saved separately) would be merged. Raise or lower `duplicate_window_s`
+  after reviewing flagged pairs.
 
 - Cadence normalisation assumes values below 120 are per-leg. Walking can be misclassified.
 - Timezone is set by configured date ranges, not per activity location (GPS is trimmed before

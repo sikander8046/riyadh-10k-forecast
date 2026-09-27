@@ -41,6 +41,18 @@ def test_full_pipeline(sample_export, make_config, tmp_path):
     # planted problems are detected
     dq = dict(con.execute("SELECT check_name, failed FROM marts.dq_report").fetchall())
     assert dq["export_duplicate_rows"] == 1
+    assert dq["device_duplicates"] == 1
+
+    # the band copy is flagged and the GPS recording of that session is the one kept
+    dup = con.execute(
+        """
+        SELECT d.name, d.has_gps, k.has_gps, k.activity_id IN (SELECT activity_id FROM marts.fct_runs)
+        FROM staging.stg_activities d
+        JOIN staging.stg_activities k ON k.activity_id = d.duplicate_of
+        WHERE d.is_device_duplicate
+        """
+    ).fetchall()
+    assert dup == [("Outdoor run", False, True, True)]
     assert dq["gps_speed_spikes"] > 0
     assert dq["hr_sample_validity"] > 0
     assert dq["long_pauses"] == 1
@@ -60,4 +72,5 @@ def test_incremental_ingest_uses_cache(sample_export, make_config, capsys):
     config = make_config(sample_export)
     main(["--config", str(config), "ingest"])
     main(["--config", str(config), "ingest"])
-    assert "63 cached" in capsys.readouterr().out
+    second_run = capsys.readouterr().out.strip().splitlines()[-1]
+    assert " 0 parsed" in second_run and " 0 cached" not in second_run

@@ -73,4 +73,5 @@ SELECT
     s.activity_id IS NOT NULL                                                 AS has_stream
 FROM staging.stg_activities AS a
 LEFT JOIN per_run AS s USING (activity_id)
-WHERE a.is_run;
+WHERE a.is_run
+  AND NOT a.is_device_duplicate;

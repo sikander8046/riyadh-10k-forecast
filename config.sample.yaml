@@ -28,3 +28,4 @@ quality:
   hr_min_valid: 35
   hr_max_margin: 10         # HR above hr_max + margin is treated as sensor noise
   pause_gap_s: 10           # gaps longer than this are excluded from moving time
+  duplicate_window_s: 180   # activities starting this close together are one session recorded twice

@@ -32,6 +32,7 @@ class Config:
     hr_min_valid: int = 35
     hr_max_margin: int = 10
     pause_gap_s: int = 10
+    duplicate_window_s: int = 180
     extra: dict = field(default_factory=dict)
 
     @property
@@ -84,6 +85,7 @@ def load_config(path: str | Path = "config.yaml") -> Config:
         hr_min_valid=int(quality.get("hr_min_valid", 35)),
         hr_max_margin=int(quality.get("hr_max_margin", 10)),
         pause_gap_s=int(quality.get("pause_gap_s", 10)),
+        duplicate_window_s=int(quality.get("duplicate_window_s", 180)),
     )
 
 

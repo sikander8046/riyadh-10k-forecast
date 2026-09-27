@@ -30,6 +30,13 @@ class Check:
 
 CHECKS: list[Check] = [
     Check(
+        "device_duplicates",
+        "info",
+        1.0,
+        "Sessions uploaded twice by two devices; the GPS copy is kept, the other excluded",
+        "SELECT count(*) FILTER (WHERE is_device_duplicate), count(*) FROM staging.stg_activities",
+    ),
+    Check(
         "export_duplicate_rows",
         "warn",
         0.0,

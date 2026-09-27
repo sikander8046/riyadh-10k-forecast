@@ -1,4 +1,4 @@
-"""Command line entry point: `runlab ingest | build | quality | all | summary`."""
+"""Command line entry point: `runlab ingest | build | quality | all | summary | sql`."""
 
 from __future__ import annotations
 
@@ -20,6 +20,8 @@ def main(argv: list[str] | None = None) -> int:
     all_ = sub.add_parser("all", help="ingest + build + quality")
     all_.add_argument("--force", action="store_true")
     sub.add_parser("summary", help="print headline numbers from the warehouse")
+    sql = sub.add_parser("sql", help="run a read-only SQL query against the warehouse")
+    sql.add_argument("query")
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
@@ -48,6 +50,15 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "summary":
         _summary(cfg)
+
+    if args.command == "sql":
+        import pandas as pd
+
+        from runlab.warehouse import connect
+
+        with connect(cfg, read_only=True) as con:
+            with pd.option_context("display.max_rows", 200, "display.width", 200):
+                print(con.execute(args.query).df().to_string(index=False))
     return 0
 
 

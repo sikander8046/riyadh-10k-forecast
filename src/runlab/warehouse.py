@@ -14,7 +14,7 @@ LAYERS = ("staging", "marts")
 _EMPTY_RECORDS = """
 CREATE OR REPLACE TABLE raw.records (
     activity_id BIGINT, ts TIMESTAMP, lat DOUBLE, lon DOUBLE, altitude_m DOUBLE,
-    hr DOUBLE, cadence DOUBLE, distance_m DOUBLE, speed_mps DOUBLE
+    hr DOUBLE, cadence DOUBLE, distance_m DOUBLE, speed_mps DOUBLE, had_gps BOOLEAN
 )
 """
 
@@ -59,7 +59,8 @@ def load_params(con: duckdb.DuckDBPyConnection, cfg: Config) -> None:
         CREATE OR REPLACE TABLE staging.params AS
         SELECT ?::DOUBLE AS hr_max, ?::DOUBLE AS hr_rest, ?::DOUBLE AS trimp_a,
                ?::DOUBLE AS trimp_b, ?::DOUBLE AS hr_min_valid, ?::DOUBLE AS hr_max_margin,
-               ?::DOUBLE AS max_run_speed_mps, ?::DOUBLE AS pause_gap_s
+               ?::DOUBLE AS max_run_speed_mps, ?::DOUBLE AS pause_gap_s,
+               ?::DOUBLE AS duplicate_window_s
         """,
         [
             cfg.hr_max,
@@ -70,6 +71,7 @@ def load_params(con: duckdb.DuckDBPyConnection, cfg: Config) -> None:
             cfg.hr_max_margin,
             cfg.max_run_speed_mps,
             cfg.pause_gap_s,
+            cfg.duplicate_window_s,
         ],
     )
 
