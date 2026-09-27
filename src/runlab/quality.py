@@ -146,6 +146,13 @@ CHECKS: list[Check] = [
         """,
     ),
     Check(
+        "weather_coverage",
+        "info",
+        1.0,
+        "Runs without weather data (run `make weather` to download it)",
+        "SELECT count(*) FILTER (WHERE temp_c IS NULL), count(*) FROM marts.fct_run_conditions",
+    ),
+    Check(
         "treadmill_runs",
         "info",
         1.0,

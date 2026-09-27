@@ -1,10 +1,15 @@
-.PHONY: install data sample summary test lint clean
+.PHONY: install data weather sample summary test lint clean
 
 install:            ## install the package with dev tools
 	pip install -e ".[dev]"
 
 data:               ## run the full pipeline on your own export (data/raw/strava_export)
 	runlab all
+
+weather:            ## download weather for every run, then rebuild and re-audit
+	runlab weather
+	runlab build
+	runlab quality
 
 sample:             ## generate the synthetic export and run the pipeline on it
 	python scripts/make_sample_export.py data/raw/sample_export

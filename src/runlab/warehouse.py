@@ -18,6 +18,13 @@ CREATE OR REPLACE TABLE raw.records (
 )
 """
 
+_EMPTY_WEATHER = """
+CREATE OR REPLACE TABLE raw.weather_hourly (
+    lat_r DOUBLE, lon_r DOUBLE, hour_utc TIMESTAMP, temp_c DOUBLE, humidity_pct DOUBLE,
+    dew_point_c DOUBLE, feels_like_c DOUBLE, wind_mps DOUBLE
+)
+"""
+
 
 def connect(cfg: Config, read_only: bool = False) -> duckdb.DuckDBPyConnection:
     cfg.warehouse.parent.mkdir(parents=True, exist_ok=True)
@@ -49,6 +56,14 @@ def load_raw(con: duckdb.DuckDBPyConnection, cfg: Config) -> None:
         )
     else:
         con.execute(_EMPTY_RECORDS)
+    weather = interim / "weather_hourly.parquet"
+    if weather.exists():
+        con.execute(
+            "CREATE OR REPLACE TABLE raw.weather_hourly AS SELECT * FROM read_parquet(?)",
+            [str(weather)],
+        )
+    else:
+        con.execute(_EMPTY_WEATHER)
 
 
 def load_params(con: duckdb.DuckDBPyConnection, cfg: Config) -> None:

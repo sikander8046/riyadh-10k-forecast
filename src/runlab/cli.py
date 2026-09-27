@@ -20,6 +20,7 @@ def main(argv: list[str] | None = None) -> int:
     all_ = sub.add_parser("all", help="ingest + build + quality")
     all_.add_argument("--force", action="store_true")
     sub.add_parser("summary", help="print headline numbers from the warehouse")
+    sub.add_parser("weather", help="download historical weather for every run (needs internet)")
     sql = sub.add_parser("sql", help="run a read-only SQL query against the warehouse")
     sql.add_argument("query")
     args = parser.parse_args(argv)
@@ -47,6 +48,11 @@ def main(argv: list[str] | None = None) -> int:
         if (report["status"] == "FAIL").any():
             print("Data-quality errors found; see reports/data_quality.md", file=sys.stderr)
             return 1
+
+    if args.command == "weather":
+        from runlab.weather import run_weather
+
+        print(f"[weather] {run_weather(cfg)}")
 
     if args.command == "summary":
         _summary(cfg)

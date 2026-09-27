@@ -1,6 +1,6 @@
 # Data quality report
 
-_Generated 2026-09-27 18:23 by `runlab quality`._
+_Generated 2026-09-27 18:35 by `runlab quality`._
 
 | Status | Check | Failed / total | Rate | Tolerance | What it means |
 |---|---|---|---|---|---|
@@ -18,4 +18,5 @@ _Generated 2026-09-27 18:23 by `runlab quality`._
 | PASS | `gps_speed_spikes` | 25 / 151,339 | 0.02% | 0.5% | GPS speed samples are below the spike threshold |
 | PASS | `distance_agreement` | 2 / 123 | 1.63% | 10.0% | Stream distance is within 5% of Strava's recorded distance |
 | PASS | `long_pauses` | 1 / 123 | 0.81% | 100.0% | Runs containing a recording gap longer than 5 minutes (watch paused or stopped) |
+| PASS | `weather_coverage` | 0 / 123 | 0.00% | 100.0% | Runs without weather data (run `make weather` to download it) |
 | PASS | `treadmill_runs` | 0 / 123 | 0.00% | 100.0% | Treadmill / virtual runs (pace comes from the device, not GPS) |
