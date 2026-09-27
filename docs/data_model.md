@@ -74,3 +74,7 @@ ID. Flagged copies stay in `stg_activities` for the audit and are excluded from
   it could be used). Runs near midnight during travel may land on the wrong local date.
 - GPS spikes inflate stream distance for GPX files that lack a device distance field; Strava's
   own distance from activities.csv is used for pace, and `distance_agreement` measures the gap.
+
+## Classification rule
+
+An activity's Strava type, not its name, decides whether it is a run. Names are free text and often left as Strava's automatic label. Checked case: three sessions in October 2022 named "Morning Walk" but typed Run had paces of 7:29 to 8:10 per km, consistent with walk/run sessions, so they are kept as runs.
