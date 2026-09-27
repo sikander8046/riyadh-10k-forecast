@@ -21,7 +21,7 @@ SELECT
     b.lon,
     b.altitude_m,
     b.distance_m,
-    b.speed_mps,
+    CASE WHEN b.distance_m IS NOT NULL THEN b.speed_mps END AS speed_mps,
     b.hr                                                                     AS hr_raw,
     CASE
         WHEN b.hr BETWEEN p.hr_min_valid AND p.hr_max + p.hr_max_margin THEN b.hr
@@ -31,8 +31,8 @@ SELECT
                                                                              AS cadence_spm,
     coalesce(b.gap_s, 0)                                                     AS gap_s,
     coalesce(b.gap_s, 0) > p.pause_gap_s                                     AS is_gap,
-    coalesce(b.speed_mps, 0) > p.max_run_speed_mps                           AS is_speed_spike,
+    b.distance_m IS NOT NULL AND coalesce(b.speed_mps, 0) > p.max_run_speed_mps AS is_speed_spike,
     coalesce(b.gap_s, 0) BETWEEN 0 AND p.pause_gap_s
-        AND b.speed_mps BETWEEN 0.5 AND p.max_run_speed_mps                  AS is_moving
+        AND (b.distance_m IS NULL OR b.speed_mps BETWEEN 0.5 AND p.max_run_speed_mps) AS is_moving
 FROM base AS b
 CROSS JOIN staging.params AS p;

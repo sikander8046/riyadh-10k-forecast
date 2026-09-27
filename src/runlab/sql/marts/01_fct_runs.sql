@@ -55,6 +55,7 @@ SELECT
     a.name,
     a.activity_type,
     a.is_treadmill,
+    a.has_gps,
     coalesce(a.distance_m, s.distance_m_stream)                               AS distance_m,
     coalesce(s.moving_s_stream, a.moving_s)                                   AS moving_s,
     coalesce(s.moving_s_stream, a.moving_s)
