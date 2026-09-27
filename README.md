@@ -61,9 +61,9 @@ activities are cached, so only new runs are processed.
 
 - [x] **Week 1: Foundation.** Ingestion for FIT/GPX/TCX, privacy trimming, DuckDB warehouse,
       training load (TRIMP, fitness-fatigue, ACWR), 13-check quality audit, tests, CI
-- [ ] **Weeks 2–3:** historical weather join (Open-Meteo), heat index per run, first real-data audit
-- [ ] **Weeks 4–5:** exploratory analysis and training-load chapter
-- [ ] **Weeks 6–7:** aerobic efficiency, heat penalty model, intensity distribution
+- [x] **Weeks 2–3:** historical weather join (Open-Meteo), device-duplicate and sparse-speed bugs found and fixed
+- [x] **Weeks 4–5:** exploratory analysis and training-load chapter
+- [x] **Weeks 6–7:** aerobic efficiency, heat penalty model (weak/inconclusive, documented), intensity distribution
 - [ ] **Weeks 8–9:** race-time model, backtest, interim forecast published
 - [ ] **Weeks 10–11:** interactive dashboard (Streamlit) and Power BI version
 - [ ] **Week 12:** full case-study write-up
@@ -77,7 +77,7 @@ _Chapters are published here as they are completed._
 1. Data quality: what's wrong with my wrist-sensor data, measured (Week 4)
 2. Training load: how fit, how fatigued, and when
 3. Aerobic efficiency: am I actually getting fitter?
-4. The heat penalty: what Riyadh summers cost per kilometre
+4. [Heat and humidity](reports/figures/heat_effect_dew_point_c.png): weak evidence that humidity, not raw temperature, is the stronger drag on efficiency (r = -0.20 vs -0.07), consistent with how sweat evaporation works, but too weak to confirm from a training block concentrated in one narrow, hot-humid range
 5. Intensity distribution
 6. The forecast
 7. Limitations
