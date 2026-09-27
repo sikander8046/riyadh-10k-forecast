@@ -78,3 +78,7 @@ ID. Flagged copies stay in `stg_activities` for the audit and are excluded from
 ## Classification rule
 
 An activity's Strava type, not its name, decides whether it is a run. Names are free text and often left as Strava's automatic label. Checked case: three sessions in October 2022 named "Morning Walk" but typed Run had paces of 7:29 to 8:10 per km, consistent with walk/run sessions, so they are kept as runs.
+
+## Sparse device speed values
+
+Some files record GPS distance every second but only report a speed value every few seconds (observed in files named "Outdoor run" and Nike Run Club activities). The original rule filled in speed only when a file's entire speed column was empty, so these partially-empty files kept their sparse speed as-is, and every second with a missing value was wrongly classified as not moving. One diagnosed run (23 May 2025) had 24.9 minutes of continuous, gap-free GPS recording but only 3.7 minutes counted as moving. Fix: fill any individual missing speed value from the distance change since the previous reading, keeping the device's own speed wherever it exists. Confirmed against four previously-affected dates, all now showing realistic paces (4:45-6:51/km).
