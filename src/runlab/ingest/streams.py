@@ -177,10 +177,16 @@ def finalise(df: pd.DataFrame) -> pd.DataFrame:
     elif df["distance_m"].notna().any():
         df["distance_m"] = df["distance_m"].ffill().fillna(0.0)
 
-    if df["speed_mps"].isna().all() and df["distance_m"].notna().any():
+    # Some devices (notably some phone running apps) log a GPS fix and distance
+    # every second but only report a speed value every few seconds. Filling
+    # only the gaps -- rather than requiring every value to be missing --
+    # recovers moving time on those seconds instead of losing it as "not
+    # moving". A device's own speed reading is kept wherever it exists, since
+    # it can be smoother (GPS Doppler) than a raw distance difference.
+    if df["distance_m"].notna().sum() > 1 and df["speed_mps"].isna().any():
         dt = df["ts"].diff().dt.total_seconds()
         dd = df["distance_m"].diff()
-        speed = (dd / dt).where(dt > 0)
-        df["speed_mps"] = speed.fillna(0.0)
+        derived = (dd / dt).where(dt > 0)
+        df["speed_mps"] = df["speed_mps"].fillna(derived)
 
     return df[COLUMNS]
