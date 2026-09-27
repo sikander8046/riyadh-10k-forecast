@@ -1,0 +1,12 @@
+# Personal data never leaves your machine
+data/raw/*
+data/interim/*
+data/warehouse/*
+!data/**/.gitkeep
+
+__pycache__/
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+.DS_Store

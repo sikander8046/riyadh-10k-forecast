@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "runlab"
+version = "0.1.0"
+description = "Forecasting a 10K race time from personal Strava data: ingestion, warehouse, quality audit and training-load models."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "duckdb>=1.1",
+  "pandas>=2.1",
+  "pyarrow>=14",
+  "fitdecode>=0.10",
+  "gpxpy>=1.6",
+  "pyyaml>=6",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "fit-tool>=0.9", "ruff>=0.5"]
+
+[project.scripts]
+runlab = "runlab.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+runlab = ["sql/**/*.sql"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 110
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

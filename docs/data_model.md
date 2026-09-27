@@ -1,0 +1,62 @@
+# Data model
+
+```
+Strava export ──► data/interim (Parquet, privacy-trimmed) ──► raw ──► staging ──► marts
+```
+
+## raw (loaded as-is from Parquet)
+
+| Table | Grain | Notes |
+|---|---|---|
+| `raw.activities` | one row per activities.csv row | Duplicates kept so the audit can count them |
+| `raw.records` | one row per stream sample | Only runs are parsed. GPS already trimmed at ingestion |
+| `raw.ingest_log` | one row per activity | `parsed`, `cached`, `file_not_found`, `no_stream_file`, `parse_error`, `skipped_non_run` |
+
+## staging
+
+| Table | Grain | Key logic |
+|---|---|---|
+| `staging.params` | single row | Athlete and quality settings from config.yaml, joined into models instead of hard-coding |
+| `staging.stg_activities` | activity (PK `activity_id`) | Dedup, local date via timezone periods, treadmill flag |
+| `staging.stg_records` | activity × timestamp | `gap_s` (time each sample represents), invalid HR nulled (raw kept in `hr_raw`), cadence normalised to steps/min, `is_gap`, `is_speed_spike`, `is_moving` |
+
+## marts
+
+| Table | Grain | Columns worth knowing |
+|---|---|---|
+| `marts.fct_runs` | run (PK `activity_id`) | `pace_s_per_km`, time-weighted `avg_hr`, `hr_coverage`, `trimp`, `ef`, `decoupling_pct`, `has_stream` |
+| `marts.fct_daily_load` | calendar day, rest days included | `runs`, `km`, `moving_min`, `trimp`, `runs_without_hr` |
+| `marts.fct_fitness` | calendar day | `ctl` (fitness), `atl` (fatigue), `tsb` (form), `acwr` |
+| `marts.dq_report` | quality check | `status`, `failed`, `total`, `rate`, `tolerance` |
+
+## Metric definitions
+
+**Moving time.** Sum of sample intervals where the gap to the previous sample is at most `pause_gap_s`
+and speed is between 0.5 m/s and the spike threshold. Every stream metric is weighted by this time,
+not by row count, so 1 s and "smart recording" devices give comparable numbers.
+
+**Heart-rate reserve.** `HRr = (HR - HR_rest) / (HR_max - HR_rest)`.
+
+**Banister TRIMP.** `Σ minutes × HRr × a × e^(b × HRr)`, with a = 0.64, b = 1.92 (male) or
+a = 0.86, b = 1.67 (female). Runs without heart rate have NULL TRIMP, counted in
+`runs_without_hr` so the resulting under-estimate of load is visible rather than hidden.
+
+**Efficiency factor (EF).** Average moving speed in m/min divided by average HR. Rising EF at
+similar effort means aerobic fitness is improving.
+
+**Aerobic decoupling.** `(EF first half − EF second half) / EF first half`, halves split by moving
+time. Above ~5% on a steady run suggests the aerobic base is the limiter. Meaningless for
+intervals, so filter by session type before interpreting it.
+
+**Fitness-fatigue.** `CTL_t = CTL_{t-1} + (TRIMP_t − CTL_{t-1}) / 42`, ATL likewise with 7 days,
+`TSB_t = CTL_{t-1} − ATL_{t-1}`.
+
+**ACWR.** 7-day mean load / 28-day mean load (rolling-average form; undefined for the first 27 days).
+
+## Known limitations
+
+- Cadence normalisation assumes values below 120 are per-leg. Walking can be misclassified.
+- Timezone is set by configured date ranges, not per activity location (GPS is trimmed before
+  it could be used). Runs near midnight during travel may land on the wrong local date.
+- GPS spikes inflate stream distance for GPX files that lack a device distance field; Strava's
+  own distance from activities.csv is used for pace, and `distance_agreement` measures the gap.
