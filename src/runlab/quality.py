@@ -92,9 +92,16 @@ CHECKS: list[Check] = [
         "hr_coverage",
         "warn",
         0.10,
-        "Runs with a stream have heart rate for at least 80% of moving time",
-        "SELECT count(*) FILTER (WHERE coalesce(hr_coverage, 0) < 0.8), count(*) "
-        "FROM marts.fct_runs WHERE has_stream",
+        "Runs recorded with a heart-rate sensor have HR for at least 80% of moving time",
+        "SELECT count(*) FILTER (WHERE hr_coverage < 0.8), count(*) "
+        "FROM marts.fct_runs WHERE has_stream AND hr_coverage IS NOT NULL",
+    ),
+    Check(
+        "runs_without_hr_sensor",
+        "info",
+        1.0,
+        "Runs recorded with no heart-rate sensor at all (no TRIMP; handled in the load chapter)",
+        "SELECT count(*) FILTER (WHERE hr_coverage IS NULL), count(*) FROM marts.fct_runs",
     ),
     Check(
         "hr_sample_validity",
