@@ -60,10 +60,11 @@ activities are cached, so only new runs are processed.
 ## Roadmap
 
 - [x] **Week 1: Foundation.** Ingestion for FIT/GPX/TCX, privacy trimming, DuckDB warehouse,
-      training load (TRIMP, fitness-fatigue, ACWR), 13-check quality audit, tests, CI
+      training load (TRIMP, fitness-fatigue, ACWR), 16-check quality audit, tests, CI
 - [x] **Weeks 2–3:** historical weather join (Open-Meteo), device-duplicate and sparse-speed bugs found and fixed
 - [x] **Weeks 4–5:** exploratory analysis and training-load chapter
-- [x] **Weeks 6–7:** aerobic efficiency, heat penalty model (weak/inconclusive, documented), intensity distribution
+- [x] **Weeks 6–7:** heat penalty model (weak/inconclusive, documented), intensity distribution
+- [ ] **Next:** aerobic-efficiency trend (EF over time, cardiac drift)
 - [ ] **Weeks 8–9:** race-time model, backtest, interim forecast published
 - [ ] **Weeks 10–11:** interactive dashboard (Streamlit) and Power BI version
 - [ ] **Week 12:** full case-study write-up
@@ -74,13 +75,21 @@ activities are cached, so only new runs are processed.
 
 _Chapters are published here as they are completed._
 
-1. Data quality: what's wrong with my wrist-sensor data, measured (Week 4)
-2. Training load: how fit, how fatigued, and when
+1. [Data quality](reports/data_quality.md): 290 Strava activities checked by 16 automated audits. Three real-data bugs were found by testing hypotheses against raw readings, then fixed: 74 duplicate uploads (a phone app plus a GPS-less band), placeholder speed values from the band, and sparse speed values that erased moving time and produced impossible 1:30/km paces
+2. [Training load](reports/figures/training_load.png): training came in bursts. Fitness (CTL) peaked at 42.8 on 28 November 2025, mostly from running, and decayed to about 5 by April 2026; running stopped after 5 May 2026. Since August, walking at zone 2 heart rates has rebuilt total aerobic fitness to 21.6 (as of 28 September 2026), about half the peak, while running-only fitness sits near zero (0.4). Walking builds the aerobic base but not the impact tolerance of running, so the chart shows both curves. Load on 20 days without heart-rate data (mostly a May-June 2025 Nike Run Club block) was estimated from pace, which lifted running fitness from 17.2 to 20.3 in September 2025
 3. Aerobic efficiency: am I actually getting fitter?
 4. [Heat and humidity](reports/figures/heat_effect_dew_point_c.png): weak evidence that humidity, not raw temperature, is the stronger drag on efficiency (r = -0.20 vs -0.07), consistent with how sweat evaporation works, but too weak to confirm from a training block concentrated in one narrow, hot-humid range
-5. Intensity distribution
+5. [Intensity distribution](reports/figures/intensity_distribution.png): 61% of heart-rate-validated running time was easy (Z1-Z2) against a polarized target of about 80%, with 22% in the moderate Z3 zone and 17% hard (Z4-Z5). Heat may inflate some of the Z3 share, since heart rate runs higher in hot conditions at the same pace
 6. The forecast
 7. Limitations
+
+## Figures
+
+![Training load](reports/figures/training_load.png)
+
+![Training intensity distribution](reports/figures/intensity_distribution.png)
+
+![Efficiency factor vs dew point](reports/figures/heat_effect_dew_point_c.png)
 
 ## Project structure
 
