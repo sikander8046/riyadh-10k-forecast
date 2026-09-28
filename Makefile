@@ -22,8 +22,8 @@ test:
 	pytest -q
 
 lint:
-	ruff check src tests scripts
-	ruff format --check src tests scripts
+	ruff check src tests scripts analysis
+	ruff format --check src tests scripts analysis
 
 clean:              ## delete derived data (never touches data/raw/strava_export)
 	rm -rf data/interim/* data/warehouse/* data/raw/sample_export

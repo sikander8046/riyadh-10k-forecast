@@ -84,9 +84,12 @@ def main() -> None:
         title += f"  [{args.min_km or 0:g}-{args.max_km or 99:g} km runs]"
     ax.set_title(title)
     ax.text(
-        0.02, 0.02,
+        0.02,
+        0.02,
         f"n = {len(df)} runs\nr = {r:.2f}\nEF change per +1 unit: {slope:+.4f}",
-        transform=ax.transAxes, va="bottom", fontsize=9,
+        transform=ax.transAxes,
+        va="bottom",
+        fontsize=9,
     )
     fig.tight_layout()
 
